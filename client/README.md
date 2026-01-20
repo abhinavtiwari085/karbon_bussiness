@@ -14,6 +14,12 @@ This is the React (Vite) frontend for Split Mint. It connects to the backend API
 
 The app runs at `http://localhost:5173` and expects the backend at `http://localhost:3000`.
 
+## Configuration
+The API base URL is defined in `client/src/api/client.js`:
+- `baseURL: "http://localhost:3000/api"`
+
+If you want to point to a different backend, update that value.
+
 ## Dependencies (npm)
 - react
 - react-dom
@@ -39,6 +45,21 @@ Example: add expense
 - **Register**: `/register` (sign up form)
 - **Dashboard**: `/` (list groups + create group)
 - **Group detail**: `/groups/:groupId` (participants, expenses, balances, filters)
+
+## Architecture details
+### API client and auth
+- Axios instance lives in `src/api/client.js`.
+- JWT is stored in `localStorage` and attached to every request via an interceptor.
+- If the token is missing, only public routes (login/register) are accessible.
+
+### State and data flow
+- Pages own their local state and re-fetch after mutations (create/edit/delete).
+- Balance and summary data are computed on the backend and rendered in the UI.
+- Expense filters are applied by query params and reflected in the list.
+
+### Error handling
+- Validation errors are surfaced as API responses (e.g., invalid split totals).
+- The UI can display backend messages; retrying a request is safe because most operations are idempotent or clearly scoped.
 
 ## Avatars
 Avatars are generated on the client using **DiceBear**:

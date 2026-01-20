@@ -37,6 +37,10 @@ const App = () => {
           <Route path="/groups/:groupId" element={token ? <GroupDetail /> : <Navigate to="/login" />} />
         </Routes>
       </main>
+      <footer className="app-footer">
+        <span>Split Mint</span>
+        <span className="muted">Clarity for shared expenses.</span>
+      </footer>
     </div>
   );
 };

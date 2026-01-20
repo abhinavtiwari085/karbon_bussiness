@@ -35,4 +35,9 @@ const expenseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+expenseSchema.index({ group: 1, date: -1 });
+expenseSchema.index({ group: 1, category: 1, date: -1 });
+expenseSchema.index({ group: 1, payerId: 1, date: -1 });
+expenseSchema.index({ group: 1, "splits.participantId": 1, date: -1 });
+
 module.exports = mongoose.model("Expense", expenseSchema);

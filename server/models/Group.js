@@ -21,4 +21,8 @@ const groupSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+groupSchema.index({ owner: 1 });
+groupSchema.index({ "participants.userId": 1 });
+groupSchema.index({ "participants.username": 1 });
+
 module.exports = mongoose.model("Group", groupSchema);

@@ -195,6 +195,7 @@ const GroupDetail = () => {
     setShowEditModal(true);
   };
 
+
   const closeEditModal = () => {
     setShowEditModal(false);
     setEditingExpenseId(null);
@@ -589,7 +590,10 @@ const GroupDetail = () => {
             const settleTarget = exp.splits.find(
               (split) => split.participantId === currentParticipantId
             );
-            const canSettle = settleTarget && settleTarget.participantId !== "owner";
+            const canSettle =
+              settleTarget &&
+              settleTarget.participantId !== "owner" &&
+              exp.payerId !== currentParticipantId;
             const isSettled =
               settleTarget && (exp.settledBy || []).includes(currentParticipantId);
             const canEdit = isOwner || exp.payerId === currentParticipantId;
@@ -600,7 +604,7 @@ const GroupDetail = () => {
                 <span>{new Date(exp.date).toLocaleDateString()}</span>
                 <span className="amount">₹ {exp.amount.toFixed(2)}</span>
                 <div className="row wrap action-row">
-                  {settleTarget ? (
+                  {settleTarget && exp.payerId !== currentParticipantId ? (
                     <button
                       type="button"
                       className={isSettled ? "chip active" : "chip chip-danger"}
@@ -804,7 +808,14 @@ const GroupDetail = () => {
           <ul className="settlements">
             {summary.settlements.map((s, index) => (
               <li key={index}>
-                {participants.find((p) => p.id === s.from)?.name} pays {participants.find((p) => p.id === s.to)?.name} ₹ {s.amount.toFixed(2)}
+                <span className="settle-from">
+                  {participants.find((p) => p.id === s.from)?.name}
+                </span>
+                <span className="settle-arrow" aria-hidden="true">→</span>
+                <span className="settle-to">
+                  {participants.find((p) => p.id === s.to)?.name}
+                </span>
+                <span className="settle-amount">₹ {s.amount.toFixed(2)}</span>
               </li>
             ))}
           </ul>

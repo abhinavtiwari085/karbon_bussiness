@@ -67,7 +67,13 @@ const addExpense = async (req, res) => {
   }
 
   const validIds = getParticipantIds(group);
-  const ids = participantIds || [];
+  let ids = participantIds || [];
+  if (ids.length === 0 && splitMode === "equal") {
+    ids = validIds;
+  }
+  if (ids.length === 0 && splitMode !== "equal") {
+    return res.status(400).json({ message: "Participants are required for this split mode" });
+  }
   if (!validIds.includes(payerId)) {
     return res.status(400).json({ message: "Invalid payer" });
   }
@@ -129,7 +135,13 @@ const updateExpense = async (req, res) => {
     req.body;
 
   const validIds = getParticipantIds(group);
-  const ids = participantIds || [];
+  let ids = participantIds || [];
+  if (ids.length === 0 && splitMode === "equal") {
+    ids = validIds;
+  }
+  if (ids.length === 0 && splitMode !== "equal") {
+    return res.status(400).json({ message: "Participants are required for this split mode" });
+  }
   if (!validIds.includes(payerId)) {
     return res.status(400).json({ message: "Invalid payer" });
   }

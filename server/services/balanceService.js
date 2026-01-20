@@ -47,9 +47,63 @@ const calculateBalances = ({ participants, expenses }) => {
   return balances;
 };
 
+class MaxHeap {
+  constructor() {
+    this.items = [];
+  }
+
+  size() {
+    return this.items.length;
+  }
+
+  push(item) {
+    this.items.push(item);
+    this._bubbleUp(this.items.length - 1);
+  }
+
+  pop() {
+    if (this.items.length === 0) return null;
+    const top = this.items[0];
+    const last = this.items.pop();
+    if (this.items.length > 0) {
+      this.items[0] = last;
+      this._bubbleDown(0);
+    }
+    return top;
+  }
+
+  _bubbleUp(index) {
+    while (index > 0) {
+      const parent = Math.floor((index - 1) / 2);
+      if (this.items[parent].amount >= this.items[index].amount) break;
+      [this.items[parent], this.items[index]] = [this.items[index], this.items[parent]];
+      index = parent;
+    }
+  }
+
+  _bubbleDown(index) {
+    const length = this.items.length;
+    while (true) {
+      const left = index * 2 + 1;
+      const right = index * 2 + 2;
+      let largest = index;
+
+      if (left < length && this.items[left].amount > this.items[largest].amount) {
+        largest = left;
+      }
+      if (right < length && this.items[right].amount > this.items[largest].amount) {
+        largest = right;
+      }
+      if (largest === index) break;
+      [this.items[index], this.items[largest]] = [this.items[largest], this.items[index]];
+      index = largest;
+    }
+  }
+}
+
 const buildSettlements = (balances) => {
-  const debtors = [];
-  const creditors = [];
+  const debtors = new MaxHeap();
+  const creditors = new MaxHeap();
 
   Object.values(balances).forEach((entry) => {
     if (entry.net < 0) {
@@ -60,23 +114,29 @@ const buildSettlements = (balances) => {
   });
 
   const settlements = [];
-  let i = 0;
-  let j = 0;
 
-  while (i < debtors.length && j < creditors.length) {
-    const pay = Math.min(debtors[i].amount, creditors[j].amount);
+  while (debtors.size() > 0 && creditors.size() > 0) {
+    const debtor = debtors.pop();
+    const creditor = creditors.pop();
+    const pay = roundTwo(Math.min(debtor.amount, creditor.amount));
+
     if (pay > 0) {
       settlements.push({
-        from: debtors[i].id,
-        to: creditors[j].id,
-        amount: roundTwo(pay)
+        from: debtor.id,
+        to: creditor.id,
+        amount: pay
       });
     }
-    debtors[i].amount = roundTwo(debtors[i].amount - pay);
-    creditors[j].amount = roundTwo(creditors[j].amount - pay);
 
-    if (debtors[i].amount <= 0) i += 1;
-    if (creditors[j].amount <= 0) j += 1;
+    const debtorLeft = roundTwo(debtor.amount - pay);
+    const creditorLeft = roundTwo(creditor.amount - pay);
+
+    if (debtorLeft > 0) {
+      debtors.push({ id: debtor.id, amount: debtorLeft });
+    }
+    if (creditorLeft > 0) {
+      creditors.push({ id: creditor.id, amount: creditorLeft });
+    }
   }
 
   return settlements;
